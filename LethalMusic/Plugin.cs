@@ -19,6 +19,9 @@ namespace LethalMusic {
 
 			CLog = Logger;
 			CLog.LogInfo($"Plugin {PluginName} is loaded! Version: {PluginVersion} ({(DebugMode ? "Debug" : "Release")})");
+
+			// Patches
+			Patches.StartOfRoundPatch.Patch();
 		}
 	}
 }
