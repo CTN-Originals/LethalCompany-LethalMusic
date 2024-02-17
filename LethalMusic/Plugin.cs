@@ -1,6 +1,9 @@
 using BepInEx;
 using BepInEx.Logging;
-
+using LethalMusic.Patches;
+using LethalMusic.Utilities;
+using UnityEngine;
+//
 namespace LethalMusic {
 	[BepInPlugin("com.github.legoandmars.lethalmusic", "LethalMusic", "0.0.1")]
 	public class Plugin : BaseUnityPlugin {
@@ -22,6 +25,15 @@ namespace LethalMusic {
 
 			// Patches
 			Patches.StartOfRoundPatch.Patch();
+			Patches.PlayerControllerBPatch.Patch();
+		}
+
+		private void Update() {
+			// Console.LogDebug("Update");
+			// if (Input.GetKeyDown(KeyCode.Space)) {
+			// 	Console.LogInfo("Spawning enemy keybind pressed!");
+			// 	StartOfRoundPatch.SpawnTestEnemy("Crawler");
+			// }
 		}
 	}
 }
