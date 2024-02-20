@@ -1,30 +1,26 @@
-
-using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using GameNetcodeStuff;
-using HarmonyLib;
 using LethalMusic.Utilities;
 using UnityEngine;
 
 namespace LethalMusic.Patches {
-	public class TestEnemyInstance {
-		public Transform transform;
-		public EnemyAI enemyAI;
-		public Vector3 spawnPos;
-		public int maxHealth;
-
-		public void ReturnToSpawn() {
-			if (enemyAI.enemyHP < maxHealth) {
-				return;
-			}
-			transform.position = spawnPos;
-		}
-	}
-
 	public class StartOfRoundPatch {
 		public static void Patch() {
 			On.StartOfRound.Update += UpdatePatch;
+		}
+
+		public class TestEnemyInstance {
+			public Transform transform;
+			public EnemyAI enemyAI;
+			public Vector3 spawnPos;
+			public int maxHealth;
+
+			public void ReturnToSpawn() {
+				if (enemyAI.enemyHP < maxHealth) {
+					return;
+				}
+				transform.position = spawnPos;
+			}
 		}
 
 		public static List<TestEnemyInstance> testEnemies = new List<TestEnemyInstance>();
@@ -39,13 +35,13 @@ namespace LethalMusic.Patches {
 				}
 			}
 
-			Console.LogInfo("StartOfRound.Update");
 			orig(self);
 		}
 
-		public static EnemyType SpawnTestEnemy(string name) {
-			EnemyType enemyType = GetEnemyTypeByName(name);
-			if (enemyType == null) {
+		//? Spawns a random enemy by default
+		public static EnemyType SpawnTestEnemy(int type = -1, string name = null) {
+			EnemyType enemyType = (name == null) ? null : GetEnemyTypeByName(name);
+			if (enemyType == null && name != null) {
 				Console.LogError($"Enemy type {name} not found");
 				return null;
 			}
@@ -53,7 +49,7 @@ namespace LethalMusic.Patches {
 			PlayerControllerB localPlayer = GameNetworkManager.Instance.localPlayerController;
 			Vector3 spawnPos = localPlayer.transform.position + localPlayer.transform.forward * 5f;
 
-			var res = RoundManager.Instance.SpawnEnemyGameObject(spawnPos, 0f, -1, enemyType);
+			var res = RoundManager.Instance.SpawnEnemyGameObject(spawnPos, 0f, type, enemyType);
 			EnemyAI enemyAI = null;
 			if (res.TryGet(out var networkObject)) {
 				enemyAI = networkObject.GetComponent<EnemyAI>();
