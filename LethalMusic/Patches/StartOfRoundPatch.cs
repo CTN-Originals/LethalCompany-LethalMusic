@@ -1,97 +1,18 @@
 using System.Collections.Generic;
 using GameNetcodeStuff;
-using LethalMusic.Utilities;
 using UnityEngine;
+using LethalMusic.Utilities;
 
 namespace LethalMusic.Patches {
 	public class StartOfRoundPatch {
 		public static void Patch() {
-			On.StartOfRound.Update += UpdatePatch;
+			On.StartOfRound.Start += StartPatch;
 		}
 
-		public class TestEnemyInstance {
-			public Transform transform;
-			public EnemyAI enemyAI;
-			public Vector3 spawnPos;
-			public int maxHealth;
-
-			public void ReturnToSpawn() {
-				if (enemyAI.enemyHP < maxHealth) {
-					return;
-				}
-				transform.position = spawnPos;
-			}
-		}
-
-		public static List<TestEnemyInstance> testEnemies = new List<TestEnemyInstance>();
-
-		private static void UpdatePatch(On.StartOfRound.orig_Update orig, StartOfRound self) {
-			foreach (TestEnemyInstance testEnemy in testEnemies) {
-				if (!testEnemy.enemyAI.isEnemyDead) {
-					testEnemy.ReturnToSpawn();
-				}
-				else {
-					testEnemies.Remove(testEnemy);
-				}
-			}
-
+		private static void StartPatch(On.StartOfRound.orig_Start orig, StartOfRound self) {
 			orig(self);
-		}
-
-		//? Spawns a random enemy by default
-		public static EnemyType SpawnTestEnemy(int type = -1, string name = null) {
-			EnemyType enemyType = (name == null) ? null : GetEnemyTypeByName(name);
-			if (enemyType == null && name != null) {
-				Console.LogError($"Enemy type {name} not found");
-				return null;
-			}
-
-			PlayerControllerB localPlayer = GameNetworkManager.Instance.localPlayerController;
-			Vector3 spawnPos = localPlayer.transform.position + localPlayer.transform.forward * 5f;
-
-			var res = RoundManager.Instance.SpawnEnemyGameObject(spawnPos, 0f, type, enemyType);
-			EnemyAI enemyAI = null;
-			if (res.TryGet(out var networkObject)) {
-				enemyAI = networkObject.GetComponent<EnemyAI>();
-			}
-			else {
-				Console.LogError("Failed to spawn enemy");
-				return null;
-			}
-
-			Console.LogDebug($"Spawned enemy: {enemyAI.gameObject.name}");
-
-			TestEnemyInstance testEnemy = new() {
-				transform = enemyAI.transform,
-				enemyAI = enemyAI,
-				spawnPos = spawnPos,
-				maxHealth = enemyAI.enemyHP
-			};
-
-			testEnemies.Add(testEnemy);
-
-			return enemyType;
-		}
-
-		public static EnemyType GetEnemyTypeByName(string name) {
-			name = name.Replace(" ", "").ToLower();
-
-			foreach (SelectableLevel level in StartOfRound.Instance.levels) {
-				// Console.LogDebug($"-- Level: {level.sceneName} --");
-				List<EnemyType> enemies = level.Enemies.ConvertAll(x => x.enemyType);
-				enemies.AddRange(level.OutsideEnemies.ConvertAll(x => x.enemyType));
-				enemies.AddRange(level.DaytimeEnemies.ConvertAll(x => x.enemyType));
-
-				foreach (EnemyType enemy in enemies) {
-					// Console.LogDebug($"Enemy: {enemy.enemyName}");
-					string enemyName = enemy.enemyName.Replace(" ", "").ToLower();
-					if (enemyName == name) {
-						return enemy;
-					}
-				}
-			}
-			
-			return null;
+			Console.LogInfo("StartOfRound.Start");
+			Managers.EnemyManager.Start();
 		}
 	}
 }

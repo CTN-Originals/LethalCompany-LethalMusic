@@ -4,6 +4,7 @@
 *.ahk
 /.vscode/
 *.bat
+**/resources/preview/
 
 /libs/**
 !/libs/.gitkeep

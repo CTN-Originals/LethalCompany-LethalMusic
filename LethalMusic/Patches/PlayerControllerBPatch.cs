@@ -9,6 +9,7 @@ namespace LethalMusic.Patches {
 	public class PlayerControllerBPatch {
 		public static void Patch() {
 			On.GameNetcodeStuff.PlayerControllerB.Start += StartPatch;
+			On.GameNetcodeStuff.PlayerControllerB.ConnectClientToPlayerObject += ConnectClientToPlayerObjectPatch;
 
 			#if DEBUG
 				On.GameNetcodeStuff.PlayerControllerB.InspectItem_performed += InspectItem_performedPatch;
@@ -20,6 +21,13 @@ namespace LethalMusic.Patches {
 		private static void StartPatch(On.GameNetcodeStuff.PlayerControllerB.orig_Start orig, PlayerControllerB self) {
 			orig(self);
 			Console.LogInfo("PlayerControllerB.Start");
+		}
+		private static void ConnectClientToPlayerObjectPatch(On.GameNetcodeStuff.PlayerControllerB.orig_ConnectClientToPlayerObject orig, PlayerControllerB self) {
+			orig(self);
+			Console.LogInfo("PlayerControllerB.ConnectClientToPlayerObject");
+			if (Plugin.LocalPlayer == null) {
+				Plugin.LocalPlayer = GameNetworkManager.Instance.localPlayerController;
+			}
 		}
 
 		#region Debugging //! For Debugging Purposes Only!! (Only works if dll is compiled with DEBUG flag)
