@@ -1,16 +1,16 @@
-
-## Mob Interaction
 `?` = Either/Or (default if not specified)
 `#` = Collection
 `!` = Required
 `*` = Exception
+`(?)` = Concept/Idea
 
+## Monster Interaction
 - [ ] `#` **Encounter**
-	- [ ] `?` Player detects mob
+	- [ ] `!` Player detects mob
 		- [ ] `!` Mob is within a certain distance
 		- [ ] `?` Mob can be seen by the player
 			- [ ] `!` Line of sight
-			- [ ] `!` Light level
+			- [ ] `(?)` Light level
 	- [ ] `?` Mob is withing a certain distance of the player
 		- [ ] `!` Distance mesured by unobstructed path to the player
 	- [ ] `?` Mob detects player
@@ -38,3 +38,7 @@
 	- [ ] `?` Mob is killed
 		- [ ] `?` By the player
 		- [ ] `?` By other means
+
+## Custom Monster user entry
+- [ ] `(?)` **JSON user entry system**
+	- [ ] `!` User can input a JSON file to define a custom monster's behavior
