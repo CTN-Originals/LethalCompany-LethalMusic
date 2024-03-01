@@ -1,8 +1,12 @@
 using BepInEx;
 using BepInEx.Logging;
 using GameNetcodeStuff;
-using LethalMusic.Utilities;
+using UnityEngine;
 using UnityEngine.InputSystem;
+
+using LethalMusic.Utilities;
+using LethalMusic.Managers;
+using LethalMusic.Patches;
 
 namespace LethalMusic {
 	[BepInPlugin("com.ctnoriginals.lethalmusic", "LethalMusic", "0.0.1")]
@@ -15,8 +19,6 @@ namespace LethalMusic {
 
 		public static bool DebugMode = false;
 		public static bool OutputDebugLogs = false;
-
-		public static PlayerControllerB LocalPlayer;
 
 		private void Awake() {
 			#if DEBUG
@@ -35,12 +37,31 @@ namespace LethalMusic {
 		private void Start() {
 		}
 
+		private int _outputDebugLogFrames = 0;
 		private void Update() {
-			Managers.EnemyManager.Update();
+			EnemyManager.Update();
+			PlayerManager.Update();
 
 			if (DebugMode) {
-				if (Keyboard.current.numpadMultiplyKey.wasPressedThisFrame) OutputDebugLogs = true;
-				else if (OutputDebugLogs) OutputDebugLogs = false;
+				//? enable debug logs if numpadkeymultiply is pressed
+				if (!Keyboard.current.numpadMultiplyKey.wasPressedThisFrame) {
+					OutputDebugLogs = false;
+				}
+				else if (Keyboard.current.numpadMultiplyKey.wasPressedThisFrame) {
+					OutputDebugLogs = true;
+				}
+
+				#if DEBUG
+					if (Keyboard.current.numpad0Key.wasPressedThisFrame) {
+						PlayerControllerBPatch.StartSpawnEnemy(PlayerManager.LocalPlayer, -1, "Crawler");
+					}
+					else if (Keyboard.current.numpad1Key.wasPressedThisFrame) {
+						PlayerControllerBPatch.StartSpawnEnemy(PlayerManager.LocalPlayer, Random.Range(-3, -1));
+					}
+					else if (Keyboard.current.numpad2Key.wasPressedThisFrame) {
+						PlayerControllerBPatch.StartSpawnEnemy(PlayerManager.LocalPlayer);
+					}
+				#endif
 			}
 		}
 	}
@@ -60,6 +81,7 @@ namespace LethalMusic {
 		() public PlayerControllerB GetClosestPlayer(bool requireLineOfSight = false, bool cannotBeInShip = false, bool cannotBeNearShip = false)
 	
 	_ PlayerControllerB
+		> public bool isInsideFactory;
 	
 	_ StartOfRound
 		> public float fearLevel

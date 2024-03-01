@@ -2,8 +2,21 @@ using System.Collections.Generic;
 using GameNetcodeStuff;
 using UnityEngine;
 
+using LethalMusic.Managers;
 using LethalMusic.Utilities;
-using System.Linq;
+
+/* //? Useful Variables/Methods
+	_ EnemyAI
+	> public PlayerControllerB targetPlayer
+	> public bool movingTowardsTargetPlayer
+	> public bool moveTowardsDestination = true
+	> public bool isEnemyDead
+	> public Vector3 destination
+	() public PlayerControllerB CheckLineOfSightForPlayer(float width = 45f, int range = 60, int proximityAwareness = -1)
+	() public PlayerControllerB CheckLineOfSightForClosestPlayer(float width = 45f, int range = 60, int proximityAwareness = -1, float bufferDistance = 0f)
+	() public PlayerControllerB[] GetAllPlayersInLineOfSight(float width = 45f, int range = 60, Transform eyeObject = null, float proximityCheck = -1f, int layerMask = -1)
+	() public PlayerControllerB GetClosestPlayer(bool requireLineOfSight = false, bool cannotBeInShip = false, bool cannotBeNearShip = false)
+*/
 
 namespace LethalMusic.Managers {
 	public static class EnemyManager {
@@ -84,19 +97,19 @@ namespace LethalMusic.Managers {
 					continue;
 				}
 
-				if (Plugin.OutputDebugLogs) {
-					string[] logText = {
-						$"{testEnemy.enemyAI.enemyType.enemyName}:",
-						$"\ttargetPlayer: {Plugin.LocalPlayer.name}",
-						$"\tmovingTowardsTargetPlayer: {testEnemy.enemyAI.movingTowardsTargetPlayer}",
-						$"\tmoveTowardsDestination: {testEnemy.enemyAI.moveTowardsDestination}",
-						$"\tisEnemyDead: {testEnemy.enemyAI.isEnemyDead}",
-						"",
-						$"\tinsanityLevel: {StartOfRound.Instance.fearLevel}",
-						$"\tdestination: {testEnemy.enemyAI.destination}",
-					};
-					Console.LogDebug(string.Join("\n", logText));
-				}
+				// if (Plugin.OutputDebugLogs == true && Plugin.DebugMode == true) {
+				// 	string[] logText = {
+				// 		$"{testEnemy.enemyAI.enemyType.enemyName}:",
+				// 		$"\ttargetPlayer: {PlayerManager.LocalPlayer.name}",
+				// 		$"\tmovingTowardsTargetPlayer: {testEnemy.enemyAI.movingTowardsTargetPlayer}",
+				// 		$"\tmoveTowardsDestination: {testEnemy.enemyAI.moveTowardsDestination}",
+				// 		$"\tisEnemyDead: {testEnemy.enemyAI.isEnemyDead}",
+				// 		"",
+				// 		$"\tinsanityLevel: {StartOfRound.Instance.fearLevel}",
+				// 		$"\tdestination: {testEnemy.enemyAI.destination}",
+				// 	};
+				// 	Console.LogDebug(string.Join("\n", logText));
+				// }
 			}
 		}
 
@@ -108,7 +121,7 @@ namespace LethalMusic.Managers {
 				return null;
 			}
 
-			Vector3 spawnPos = Plugin.LocalPlayer.transform.position + Plugin.LocalPlayer.transform.forward * 5f;
+			Vector3 spawnPos = PlayerManager.LocalPlayer.transform.position + PlayerManager.LocalPlayer.transform.forward * 5f;
 
 			var res = RoundManager.Instance.SpawnEnemyGameObject(spawnPos, 0f, type, enemyType);
 			EnemyAI enemyAI = null;
@@ -118,6 +131,7 @@ namespace LethalMusic.Managers {
 				enemyAI.enemyType.canBeStunned = true;
 				enemyAI.enemyType.destroyOnDeath = true;
 				enemyAI.enemyHP = 3;
+				enemyAI.destination = spawnPos;
 			}
 			else {
 				Console.LogError("Failed to spawn enemy");
